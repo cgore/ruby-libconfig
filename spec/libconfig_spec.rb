@@ -31,102 +31,42 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-class Object
-  def to_libconfig_boolean
-    if self
-      "true"
-    else
-      "false"
+
+require_relative '../lib/libconfig'
+
+describe NilClass do
+  it "has to_libconfig_boolean" do
+    nil.to_libconfig_boolean.should == "false"
+  end
+
+  it "has to_libconfig_string" do
+    nil.to_libconfig_string.should == ""
+  end
+
+  it "has to_libconfig defaulting to to_libconfig" do
+    nil.to_libconfig.should == nil.to_libconfig_boolean
+  end
+end
+
+describe Integer do
+  it "has to_libconfig_integer" do
+    3.to_libconfig_integer.should == "3"
+    0.to_libconfig_integer.should == "0"
+    -12.to_libconfig_integer.should == "-12"
+    12345.to_libconfig_integer.should == "12345"
+  end
+
+  it "has to_libconfig_string" do
+    3.to_libconfig_string.should == '"3"'
+    0.to_libconfig_string.should == '"0"'
+    -12.to_libconfig_string.should == '"-12"'
+    12345.to_libconfig_string.should == '"12345"'
+  end
+
+  it "has to_libconfig defaulting to to_libconfig_integer" do
+    100.times do
+      n = (rand*10000-5000).floor
+      n.to_libconfig.should == n.to_libconfig_integer
     end
   end
-
-  def to_libconfig
-    to_libconfig_boolean
-  end
-end
-
-class NilClass
-  def to_libconfig_boolean
-    "false"
-  end
-
-  def to_libconfig_string
-    ""
-  end
-
-  def to_libconfig
-    to_libconfig_boolean
-  end
-end
-
-class Integer
-  def to_libconfig_integer
-    to_s
-  end
-
-  def to_libconfig_string
-    to_s.to_libconfig
-  end
-
-  def to_libconfig
-    to_libconfig_integer
-  end
-end
-
-
-class Float
-  def to_libconfig
-    to_s
-  end
-end
-
-
-class String
-  def to_libconfig
-    '"' + self + '"'
-  end
-end
-
-
-class Symbol
-  def to_libconfig
-    to_s.to_libconfig
-  end
-end
-
-
-class Array
-  def to_libconfig_list
-    "( " + self.join(", ") + " )"
-  end
-
-  def to_libconfig_array
-    "[ " + self.join(", ") + " ]"
-  end
-
-  def to_libconfig
-    to_libconfig_list
-  end
-end
-
-
-class Hash
-  def to_libconfig_group
-    result = "{\n"
-    self.each do |key, value|
-      if not [String, Symbol].include? key.class
-        raise RuntimeError, "Invalid key type #{key.class} for libconfig group."
-      end
-      result += key.to_s + " = " + value.to_libconfig + ";\n"
-    end
-    return result + "}\n"
-  end
-
-  def to_libconfig
-    to_libconfig_group
-  end
-end
-
-
-module Libconfig
 end
